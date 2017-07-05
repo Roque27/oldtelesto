@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<configs>
+	<PATH_OUT>./out/</PATH_OUT>
+    <PATH_OUT_ORIGINAL>/lpd/out/</PATH_OUT_ORIGINAL>
+    <TEMP_DIR>/opt/lampp/htdocs/printer_web/temp/</TEMP_DIR>
+	<PATH_PREPRINTED>/opt/lampp/htdocs/printer_web/preprinted/</PATH_PREPRINTED>
+	<OS>Linux</OS>
+	<HOST>localhost</HOST>
+	<USER>root</USER>
+	<PASS>abc123</PASS>
+	<DB>pdf_printer_db</DB>
+	<ANTIGUEDAD_HASTA>15</ANTIGUEDAD_HASTA>
+</configs>

@@ -1,0 +1,68 @@
+#!/bin/sh
+# -------------------------------------------------------------------
+# "/lpd/postlpd":
+# -------------------------------------------------------------------
+#
+
+. /lpd/.pass
+
+PDFBIN=/lpd/pcl2pdf
+PDFDIR=/lpd/out
+FILENAME=
+
+now="$(date +'%d/%m/%Y %H:%M:%S.%N')"
+
+echo "------------------------------------------------------------------------"
+echo "---------------------- Comienza postlpd $5 ----------------------"
+echo "------------------ $now -----------------------"
+
+# case of wrong number of arguments
+if [ $# -ne 7 ]; then
+  echo "Uso: postlpd user title copies nombre_file fullpathfile sourcehostname"
+  exit 1
+fi
+
+# generate output filename
+OUTPUTFILENAME="$PDFDIR/$4.pdf"
+
+echo "Archivo de entrada: " $5
+echo "Archivo de salida: " $OUTPUTFILENAME
+
+
+#Landscape or portrait & run ghostpcl
+if grep -q "&l0O" $5; then
+  echo "--------------------Portrait-----------------"
+  /usr/local/bin/pcl6 -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -LPCL -sOutputFile=$OUTPUTFILENAME /lpd/macros/macros.pcl $5 >& /dev/null 2>&1
+else
+  /usr/local/bin/pcl6 -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -LPCL -J"@PJL SET ORIENTATION=LANDSCAPE" -sOutputFile=$OUTPUTFILENAME /lpd/macros/macros.pcl $5 >& /dev/null 2>&1
+  echo "-----------------Landscape---------------"
+fi
+
+info=$(pdfinfo $OUTPUTFILENAME 2>/dev/null)
+pages=$(grep Pages <<< "$info"| cut -d ":" -f 2)
+size=$(grep 'File size' <<< "$info"| cut -d ":" -f 2)
+
+#En caso de setear una contraseña a la base de datos se debe completar el password.
+echo "Comienza insert en Base de datos"
+/opt/lampp/bin/mysql -u root --password=${Password} --database=pdf_printer_db << EOF
+INSERT INTO trabajos (nombre, title, local_server, owner, pages, size_pdf, status) VALUES ("$4","$2","$6","$1","$pages","$size","SHOW");
+EOF
+echo "Finaliza insert"
+
+#save in XML
+#echo "Prev - Ejecutando Info_to_XML.py"
+#python /lpd/Info_to_XML.py "$@" $pages $size
+#echo "Post - Ejecutando Info_to_XML.py"
+
+rm $5
+
+finish="$(date +'%d/%m/%Y %H:%M:%S.%N')"
+
+echo "-------------------------------------------------------------------------"
+echo "------------------ Finaliza postlpd $5 ---------------------------"
+echo "------------------ $finish ------------------------"
+
+exit 0
+
+# EOF
+# -------------------------------------------------------------------

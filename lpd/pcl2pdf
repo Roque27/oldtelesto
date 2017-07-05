@@ -1,0 +1,41 @@
+#!/bin/sh
+# -------------------------------------------------------------------
+# "/lpd/pcl2pdf":
+# Convert PCL to PDF.
+# -------------------------------------------------------------------
+
+echo "Ejecutando pcl2pdf..."
+
+OPTIONS=""
+while true
+do
+        case "$1" in
+        -*) OPTIONS="$OPTIONS $1" ;;
+        *)  break ;;
+
+        esac
+        shift
+done
+
+if [ $# -lt 1 -o $# -gt 2 ]; then
+        echo "Usage: `basename $0` [options...] input.pcl [output.pdf]" 1>&2
+        exit 1
+fi
+
+infile=$1;
+
+if [ $# -eq 1 ]
+then
+        outfile=$1
+else
+        outfile=$2
+fi
+
+echo "Ejecutando PCL6. Entrada: " $infile " Salida: " $outfile
+
+/usr/local/bin/pcl6 -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -LPCL -sOutputFile=$outfile $OPTIONS /lpd/macros/macros.pcl $infile
+
+rm -f $infile
+
+# EOF
+# -------------------------------------------------------------------

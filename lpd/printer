@@ -1,0 +1,13 @@
+# default: off
+# description: The rsync server is a good addition to an ftp server, as it \
+#	allows crc checksumming etc.
+service printer
+{
+	disable	= no
+	socket_type     = stream
+	wait            = no
+	user            = root
+	server          = /lpd/Lpd
+	#server_args     = 
+	log_on_failure  += USERID
+}
